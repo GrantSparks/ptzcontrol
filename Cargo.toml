@@ -5,7 +5,11 @@ edition = "2024"
 
 [dependencies]
 gtk = { package = "gtk4", version = "0.11.4", features = ["v4_22"] }
+libadwaita = { version = "0.9", features = ["v1_5"] }
 relm4 = { version = "0.11", features = ["libadwaita"]  }
 relm4-macros = "0.11"
 relm4-components = "0.11"
 relm4-icons = "0.11"
+
+[build-dependencies]
+relm4-icons-build = "0.11"

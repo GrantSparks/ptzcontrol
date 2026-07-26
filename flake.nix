@@ -32,6 +32,7 @@
             graphene
             gdk-pixbuf
             libadwaita
+            librsvg
           ];
 
           # Environment variables
