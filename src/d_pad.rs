@@ -1,13 +1,15 @@
 use gtk::prelude::*;
 use relm4::prelude::*;
 
+use crate::camera::CameraAction;
+
 pub struct DPad;
 
 #[relm4::component(pub)]
 impl SimpleComponent for DPad {
     type Init = ();
     type Input = ();
-    type Output = ();
+    type Output = CameraAction;
 
     view! {
         gtk::Grid {
@@ -16,36 +18,42 @@ impl SimpleComponent for DPad {
             set_halign: gtk::Align::Center,
             set_margin_all: 10,
 
+            #[name = "up_left_btn"]
             attach[0, 0, 1, 1] = &gtk::Button {
                 set_icon_name: crate::icon_names::ARROW_TOP_LEFT,
                 set_width_request: 80,
                 set_height_request: 80,
             },
 
+            #[name = "up_btn"]
             attach[1, 0, 1, 1] = &gtk::Button {
                 set_icon_name: crate::icon_names::GO_UP,
                 set_width_request: 80,
                 set_height_request: 80,
             },
 
+            #[name = "up_right_btn"]
             attach[2, 0, 1, 1] = &gtk::Button {
                 set_icon_name: crate::icon_names::ARROW_TOP_RIGHT,
                 set_width_request: 80,
                 set_height_request: 80,
             },
 
+            #[name = "left_btn"]
             attach[0, 1, 1, 1] = &gtk::Button {
                 set_icon_name: crate::icon_names::GO_PREVIOUS,
                 set_width_request: 80,
                 set_height_request: 80,
             },
 
+            #[name = "home_btn"]
             attach[1, 1, 1, 1] = &gtk::Button {
                 set_icon_name: crate::icon_names::GO_HOME,
                 set_width_request: 80,
                 set_height_request: 80,
             },
 
+            #[name = "right_btn"]
             attach[2, 1, 1, 1] = &gtk::Button {
                 set_icon_name: crate::icon_names::GO_NEXT,
                 set_width_request: 80,
@@ -59,6 +67,7 @@ impl SimpleComponent for DPad {
                 set_height_request: 80,
             },
 
+            #[name = "down_btn"]
             attach[1, 2, 1, 1] = &gtk::Button {
                 set_icon_name: crate::icon_names::GO_DOWN,
                 set_width_request: 80,
@@ -77,13 +86,49 @@ impl SimpleComponent for DPad {
     fn init(
         _init: Self::Init,
         root: Self::Root,
-        _sender: ComponentSender<Self>,
+        sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
         let model = DPad;
         let widgets = view_output!();
 
         widgets.down_left_btn.set_css_classes(&["rotate-180"]);
         widgets.down_right_btn.set_css_classes(&["rotate-180"]);
+
+        let directions = [
+            (&widgets.up_left_btn, grafton_visca::command::PanTiltDirection::UpLeft),
+            (&widgets.up_btn, grafton_visca::command::PanTiltDirection::Up),
+            (&widgets.up_right_btn, grafton_visca::command::PanTiltDirection::UpRight),
+            (&widgets.left_btn, grafton_visca::command::PanTiltDirection::Left),
+            (&widgets.right_btn, grafton_visca::command::PanTiltDirection::Right),
+            (&widgets.down_left_btn, grafton_visca::command::PanTiltDirection::DownLeft),
+            (&widgets.down_btn, grafton_visca::command::PanTiltDirection::Down),
+            (&widgets.down_right_btn, grafton_visca::command::PanTiltDirection::DownRight),
+        ];
+
+        for (button, direction) in directions {
+            let gesture = gtk::GestureClick::new();
+            gesture.set_propagation_phase(gtk::PropagationPhase::Capture);
+            let sender_pressed = sender.clone();
+            let direction_pressed = direction.clone();
+            gesture.connect_pressed(move |_, _, _, _| {
+                let _ = sender_pressed.output(CameraAction::PanTiltMove {
+                    direction: direction_pressed.clone(),
+                });
+            });
+            let sender_released = sender.clone();
+            gesture.connect_released(move |_, _, _, _| {
+                let _ = sender_released.output(CameraAction::PanTiltStop);
+            });
+            button.add_controller(gesture);
+        }
+
+        let home_gesture = gtk::GestureClick::new();
+        home_gesture.set_propagation_phase(gtk::PropagationPhase::Capture);
+        let sender_pressed = sender.clone();
+        home_gesture.connect_pressed(move |_, _, _, _| {
+            let _ = sender_pressed.output(CameraAction::PanTiltHome);
+        });
+        widgets.home_btn.add_controller(home_gesture);
 
         ComponentParts { model, widgets }
     }

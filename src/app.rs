@@ -4,6 +4,7 @@ use gtk::prelude::*;
 use relm4::adw::prelude::*;
 use relm4::prelude::*;
 
+use crate::camera::{CameraAction, CameraService};
 use crate::d_pad::DPad;
 use crate::header::Header;
 use crate::presets::Presets;
@@ -14,11 +15,12 @@ pub struct App {
     d_pad: Controller<DPad>,
     zoom_focus: Controller<ZoomFocus>,
     presets: Controller<Presets>,
+    camera_service: CameraService,
 }
 
 #[derive(Debug)]
 pub enum AppMsg {
-    Noop,
+    CameraAction(CameraAction),
 }
 
 #[relm4::component(pub)]
@@ -56,27 +58,30 @@ impl SimpleComponent for App {
         root: Self::Root,
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
+        let camera_service = CameraService::start();
+
         let header = Header::builder()
             .launch(())
             .forward(sender.input_sender(), identity);
 
         let d_pad = DPad::builder()
             .launch(())
-            .forward(sender.input_sender(), |_| AppMsg::Noop);
+            .forward(sender.input_sender(), AppMsg::CameraAction);
 
         let zoom_focus = ZoomFocus::builder()
             .launch(())
-            .forward(sender.input_sender(), |_| AppMsg::Noop);
+            .forward(sender.input_sender(), AppMsg::CameraAction);
 
         let presets = Presets::builder()
             .launch(())
-            .forward(sender.input_sender(), |_| AppMsg::Noop);
+            .forward(sender.input_sender(), AppMsg::CameraAction);
 
         let model = App {
             header,
             d_pad,
             zoom_focus,
             presets,
+            camera_service,
         };
 
         let widgets = view_output!();
@@ -84,5 +89,11 @@ impl SimpleComponent for App {
         ComponentParts { model, widgets }
     }
 
-    fn update(&mut self, _msg: Self::Input, _sender: ComponentSender<Self>) {}
+    fn update(&mut self, msg: Self::Input, _sender: ComponentSender<Self>) {
+        match msg {
+            AppMsg::CameraAction(action) => {
+                let _ = self.camera_service.sender().send(action);
+            }
+        }
+    }
 }

@@ -1,6 +1,7 @@
 use relm4::prelude::*;
 
 mod app;
+mod camera;
 mod d_pad;
 mod header;
 mod presets;
@@ -12,6 +13,8 @@ mod icon_names {
 }
 
 fn main() {
+    tracing_subscriber::fmt::init();
+
     relm4_icons::initialize_icons(icon_names::GRESOURCE_BYTES, icon_names::RESOURCE_PREFIX);
 
     let css = ".rotate-180 { transform: rotate(180deg); }";
