@@ -4,6 +4,19 @@ fn main() {
         Some("xyz.michaelt.ptzcontrol"),
         None::<&str>,
         None::<&str>,
-        ["open-menu"],
+        [
+            "open-menu",
+            "go-up",
+            "go-down",
+            "go-previous",
+            "go-next",
+            "go-home",
+            "arrow-top-left",
+            "arrow-top-right",
+            "zoom-in",
+            "zoom-out",
+            "list-add",
+            "list-remove",
+        ],
     );
 }

@@ -13,9 +13,14 @@ impl SimpleComponent for Header {
 
     view! {
         adw::HeaderBar {
+            #[name = "camera_dropdown"]
+            pack_start = &gtk::DropDown {
+                set_halign: gtk::Align::Start,
+            },
+
             #[wrap(Some)]
             set_title_widget = &adw::WindowTitle {
-                set_title: "PTZ Camera Controller"
+                set_title: "PTZ Controller"
             },
 
             #[name = "menu_button"]
@@ -34,6 +39,13 @@ impl SimpleComponent for Header {
     ) -> ComponentParts<Self> {
         let model = Header;
         let widgets = view_output!();
+
+        let cameras = gtk::StringList::new(&["Camera 1", "Camera 2", "Camera 3"]);
+        widgets.camera_dropdown.set_model(Some(&cameras));
+        widgets.camera_dropdown.set_selected(0);
+        if let Some(button) = widgets.camera_dropdown.first_child() {
+            button.add_css_class("flat");
+        }
 
         let menu = gtk::gio::Menu::new();
         menu.append(Some("_About"), Some("app.about"));
