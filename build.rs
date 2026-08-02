@@ -17,6 +17,7 @@ fn main() {
             "zoom-out",
             "list-add",
             "list-remove",
+            "plus",
         ],
     );
 }

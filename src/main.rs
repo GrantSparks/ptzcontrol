@@ -2,9 +2,12 @@ use relm4::prelude::*;
 
 mod app;
 mod camera;
+mod camera_preferences;
+mod config;
 mod d_pad;
 mod header;
 mod presets;
+mod welcome;
 mod zoom_focus;
 
 mod icon_names {
